@@ -1,0 +1,8 @@
+#!/bin/sh
+
+files=`ls spl_progs/*.spl`
+for i in $files; do
+	echo Compiling $i
+	./spl $i 
+	echo Done
+done
