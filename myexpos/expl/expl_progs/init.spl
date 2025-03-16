@@ -1,0 +1,4 @@
+#include "syscall.spl"
+print("Done.\n");
+while(1) do
+endwhile;
