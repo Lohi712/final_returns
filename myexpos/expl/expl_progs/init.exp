@@ -1,0 +1,18 @@
+2048  0         // Reserved
+2049  2056      // Entry point (first instruction address)
+2050  0
+2051  0
+2052  0
+2053  0
+2054  0
+2055  0
+2056  MOV R0, 1
+2058  MOV R2, 5
+2060  GE R2, R0
+2062  JZ R2, 2074
+2064  MOV R1, R0
+2066  MUL R1, R0
+2068  BRKP
+2070  ADD R0, 1
+2072  JMP 2058
+2074  INT 10
