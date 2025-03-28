@@ -1,6 +1,18 @@
 loadi(63,13);
-loadi(64,14);
+loadi(64,14); // Load Library Code from disk to memory
+loadi(65,7);
+loadi(66,8); // Load the INIT program from the disk to the memory
+loadi(22,35);
+loadi(23,36); // Load the INT10 module from the disk to the memory.
+loadi(2, 15);
+loadi(3, 16); // Load the exception handler routine from the disk to the memory.
+loadi(4, 17);
+loadi(5, 18); // load the timer interrupt routine from disk blocks 17 and 18 to memory pages 4 and 5.
+
+ PTBR = PAGE_TABLE_BASE;
+PTLR = 10;
 //Library
+
 [PTBR+0] = 63;
 [PTBR+1] = "0100";
 [PTBR+2] = 64;
@@ -27,6 +39,9 @@ loadi(64,14);
 [PTBR+17] = "0110";
 [PTBR+18] = 77;
 [PTBR+19] = "0110";
-PTLR = 10;
+
 SP = 8*512;
+
 [76*512] = [65 * 512 + 1];
+
+ireturn;
