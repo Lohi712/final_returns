@@ -6,4 +6,3 @@ while(counter <= 20) do
   endif;
   counter = counter + 1;
 endwhile;
-
