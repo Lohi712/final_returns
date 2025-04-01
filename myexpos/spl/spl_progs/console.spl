@@ -1,28 +1,43 @@
-// Switching to kernel stack.
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13] = SP;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] * 512 - 1;
+//=================== CONSOLE INTERRUPT HANDLER ====================
+
+//print "console";
+// set UPTR to SP
+[PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13] = SP;
+
+// Setting SP to (UArea Page number * 512 - 1) of the process
+SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 11] * 512 - 1;
 
 backup;
 
-//print "Timer";
-
+// find pid of the process
 alias reqPID R0;
 reqPID = [TERMINAL_STATUS_TABLE + 1];
 
-[PROCESS_TABLE + reqPID * 16 + 8] = P0;
-multipush(R0, R1, R2);
+// compute process table entry of the process
+alias process_table_entry R1;
+process_table_entry = PROCESS_TABLE + (reqPID * 16);
+
+// copy the value present in P0 into the input buffer field of the process table entry
+[process_table_entry + 8] = P0;
+
+//============ release the terminal ================
+
+multipush(R0, R1);
 
 R1 = 9;
 R2 = reqPID;
 
-call MOD_0; // Call resource manager module.
+call MOD_0;
 
-multipop(R0, R1, R2);
+multipop(R0, R1);
 
+//==================================================
+
+// restore register context
 restore;
 
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
-// [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+// set SP to the top of user stack
+SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 13];
 
-//returning control to the newly scheduled process
+// return back to user mode from kernel mode
 ireturn;

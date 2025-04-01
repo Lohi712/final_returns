@@ -1,16 +1,38 @@
+decl 
+	int gcd(int a, int b);
+enddecl
+
+int gcd(int a, int b) {
+	decl 
+		int out;
+	enddecl
+
+	begin
+		write("a");
+		write(a);
+		write("b");
+		write(b);
+		if(a == 0) then
+			out = b;
+		else 
+			out = gcd((b%a), a);
+		endif;
+		return out;
+	end
+}
+
 int main() {
-    decl
-        int x, y, z, a, b, c, d;
-    enddecl
-    begin
-        x = exposcall("Read", -1, a);
-        y = exposcall("Read", -1, b);
-        while (b != 0) do
-            c = b;
-            b = a % b;
-            a = c;
-        endwhile;
-        z = exposcall("Write", -2, a);
-        return 0;
-    end
+	decl
+		int a, b, out;
+	enddecl
+	begin 
+		write("Enter a :");
+		read(a);
+		write("Enter b :");
+		read(b);
+		out = gcd(a, b);
+		write("out");
+		write(out);
+		return 0;
+	end
 }
