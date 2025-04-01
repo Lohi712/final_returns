@@ -1,3 +1,15 @@
+// Load Module 0 from disk pages 53 and 54 to memory pages 40 and 41.
+loadi(40, 53);
+loadi(41, 54);
+
+// Load Module 4 from disk pages 61 and 62 to memory pages 48 and 49.
+loadi(48, 61);
+loadi(49, 62);
+
+// Initialize the STATUS field in the Terminal Status table as 0. 
+// This will indicate that the terminal is free before scheduling the first process.
+[TERMINAL_STATUS_TABLE] = 0;
+
 //loading the INIT program
 loadi(65, 7);
 loadi(66, 8);

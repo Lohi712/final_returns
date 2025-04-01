@@ -1,4 +1,3 @@
-
 int main() {
     decl
         int x, y;
@@ -12,4 +11,3 @@ int main() {
         return 0;
     end
 }
-

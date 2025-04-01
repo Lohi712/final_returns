@@ -22,7 +22,23 @@ if (fileDescriptor != -2) then
 else
     alias word R5;
     word = [[PTBR + 2 * ((userSP - 3) / 512)] * 512 + ((userSP - 3) % 512)];
-    print word;
+
+    // Store the function number of Terminal Write in register R1,
+    // PID of the current process in register R2 and word to be 
+    // printed to the terminal in register R3.
+    
+    multipush(R0, R1, R2, R3);
+    
+    R0 = 0;
+    R1 = 3;
+    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R3 = word;
+
+    
+    call MOD_4;
+    // Ignore the value present in R0 as Terminal Write does not have any return value.
+    multipop(R0, R1, R2, R3);
+
     alias physicalAddrRetVal R6;
     physicalAddrRetVal = ([PTBR + 2 * (userSP - 1)/ 512] * 512) + ((userSP - 1) % 512);
     [physicalAddrRetVal] = 0;

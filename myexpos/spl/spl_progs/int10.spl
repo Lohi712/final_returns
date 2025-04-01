@@ -12,4 +12,3 @@ while(iter < MAX_PROC_NUM) do
 endwhile;
 
 halt;
-

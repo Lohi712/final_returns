@@ -1,2 +1,20 @@
-print "TIMER";
+backup;
+
+// Get current PID
+alias currentPID R0;
+currentPID = [SYSTEM_STATUS_TABLE + 1];
+
+// Save process state
+alias processEntry R1;
+processEntry = PROCESS_TABLE + currentPID * 16;
+[processEntry + 12] = SP % 512;  // KPTR
+[processEntry + 14] = PTBR;
+[processEntry + 15] = PTLR;
+[processEntry + 4] = READY;      // Set state
+
+// Call scheduler
+call SCHEDULER;
+
+// When we return here, we're the scheduled process
+restore;
 ireturn;

@@ -4,9 +4,9 @@ SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] * 512 - 1;
 
 backup;
 
-print "Timer";
+// print "Timer";  // Remove or comment out this line
 
-//	calling the scheduler
+// Calling the scheduler
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 4] = READY;
 call MOD_5;
 
@@ -14,6 +14,6 @@ restore;
 SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
 
-//returning control to the newly scheduled process
+// Returning control to the newly scheduled process
 ireturn;
 
