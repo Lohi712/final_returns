@@ -6,6 +6,7 @@ enddecl
 int main() {
 	
 	begin 
+		write("Enter file name : ");
 		read(filename);
 		temp = exposcall("Exec", filename);
 		return 0;

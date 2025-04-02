@@ -60,8 +60,15 @@ loadi(45, 58);
 loadi(59, 3);
 loadi(60, 4);
 
+// load disk interrupt handler from disk to memory
+loadi(6, 19);
+loadi(7, 20);
+
 // initialize the STATUS field in the Terminal Status table as 0
 [TERMINAL_STATUS_TABLE] = 0;
+
+// initialize the STATUS field in the Disk Status Table to 
+[DISK_STATUS_TABLE] = 0;
 
 //==============INIT PROCESS===============
 
@@ -110,7 +117,7 @@ PTLR=10;
 [PTBR+11] = "0100";
 [PTBR+12] = -1;
 [PTBR+13] = "0000";
-[PTBR+14] = -1;
+[PTBR+14] = -1';
 [PTBR+15] = "0000";
 
 //put stack in logical page 8 and 9
@@ -121,9 +128,20 @@ PTLR=10;
 
 // set entry point for init
 [76*512] = [65*512+1];
+
+// initialize per process resource table for init
+alias j R0;
+alias i R1;
+i = [(PROCESS_TABLE + 16) + 11] * 512 + (512 - 16);
+j = 0;
+while(j < 16) do
+	[i] = -1;
+	i = i + 1;
+	j = j + 1;
+endwhile;
+
 //=========================================
 
-alias i R0;
 i = 2;
 while(i < MAX_PROC_NUM) do
 	[(PROCESS_TABLE + (16*i))+4] = TERMINATED;

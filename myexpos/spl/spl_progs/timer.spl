@@ -1,6 +1,9 @@
 // =============TIMER INTERRUPT==================
-// print "timer";
+//print "timer";
 // set UPTR to SP
+//print [SYSTEM_STATUS_TABLE + 1];
+//print SP;
+//print [PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13];
 [PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13] = SP;
 
 // Setting SP to (UArea Page number * 512 - 1) of the process

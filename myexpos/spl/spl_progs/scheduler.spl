@@ -1,5 +1,5 @@
 // ================SCHEDULER===================
-
+//print "SCHEDULER";
 // find pid of current process
 alias currentPID R0;
 currentPID = [SYSTEM_STATUS_TABLE + 1];
@@ -37,6 +37,8 @@ while (i <= 15) do
 	i = i+1;
 endwhile;
 
+//print "newPID";
+//print newPID;
 alias new_process_entry R5;
 new_process_entry = PROCESS_TABLE + (16*newPID);
 
@@ -62,5 +64,4 @@ endif;
 
 // Restore the BP of the new process from the top of it's kernel stack
 multipop(BP);
-
 return;

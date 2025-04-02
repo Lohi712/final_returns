@@ -1,4 +1,4 @@
-//print "read"; //Read interrupt
+//print "int6"; Read interrupt
 [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1]*16) + 9] = 7;
 alias userSP R0;
 userSP = SP;
@@ -15,13 +15,12 @@ else
 	word =  [([PTBR + 2*((userSP - 3)/512)]*512) + ((userSP - 3)%512)];
 	multipush(R0, R1, R3);
 	//save functionNum(=4) in R1
-	alias functionNum R1;
-	functionNum = 3;    // Terminal Read
-	alias PID R2;
-	PID = [SYSTEM_STATUS_TABLE + 1];
-
+	fileDesc = 4;
+	//Save PID of currentProcess in R2
+	alias currentPID R2;
+	currentPID = [SYSTEM_STATUS_TABLE + 1];
+	
 	call MOD_4;
-
 	multipop(R0, R1, R3);
 	[([PTBR + 2*((userSP - 1)/512)]*512) + (userSP - 1)%512] = 0;
 endif;
