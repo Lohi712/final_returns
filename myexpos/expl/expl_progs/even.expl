@@ -1,13 +1,15 @@
 int main() {
-    decl
-        int x, y;
+    decl 
+        int num, temp;
     enddecl
-    begin
-        x = 2;
-        while(x <= 100) do
-            y = exposcall("Write", -2, x);
-            x = x + 2;
+
+    begin 
+        num = 2;
+        while (num <= 100) do
+            temp = exposcall("Write", -2, num);
+            num = num + 2;
         endwhile;
-        return 0;
+
+        return 0;  // don't Exec odd again
     end
 }

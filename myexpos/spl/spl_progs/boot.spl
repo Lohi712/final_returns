@@ -1,6 +1,6 @@
 //====================BOOT MODULE=====================
 print "boot module";
-// load init program from disk to memory
+// load init program from disk (7, 8) to memory (65, 66)
 loadi(65, 7);
 loadi(66, 8);
 
@@ -43,6 +43,22 @@ loadi(9, 22);
 // load interrupt 6 from disk to memory
 loadi(14, 27);
 loadi(15, 28);
+
+// load interrupt 9 from disk to memory
+loadi(20, 33);
+loadi(21, 34);
+
+// load process manager (module 1) from disk to memory
+loadi(42, 55);
+loadi(43, 56);
+
+// load memory manager (module 2) from disk to memory
+loadi(44, 57);
+loadi(45, 58);
+
+// load inode table from dist to memory
+loadi(59, 3);
+loadi(60, 4);
 
 // initialize the STATUS field in the Terminal Status table as 0
 [TERMINAL_STATUS_TABLE] = 0;
@@ -94,7 +110,7 @@ PTLR=10;
 [PTBR+11] = "0100";
 [PTBR+12] = -1;
 [PTBR+13] = "0000";
-[PTBR+14] = -1';
+[PTBR+14] = -1;
 [PTBR+15] = "0000";
 
 //put stack in logical page 8 and 9
@@ -110,9 +126,23 @@ PTLR=10;
 alias i R0;
 i = 2;
 while(i < MAX_PROC_NUM) do
-	[(PROCESS_TABLE + 16*i)+4] = TERMINATED;
+	[(PROCESS_TABLE + (16*i))+4] = TERMINATED;
 	i = i + 1;
 endwhile;
+
+// Initialize the memory free list with value 1 for pages used and 0 for free pages
+i = 0;
+while(i < 128) do
+	if(i <= 82) then
+		[MEMORY_FREE_LIST + i] = 1;
+	else 
+		[MEMORY_FREE_LIST + i] = 0;
+	endif;
+	i = i + 1;
+endwhile;
+
+[SYSTEM_STATUS_TABLE + 3] = 0;
+[SYSTEM_STATUS_TABLE + 2] = (128-1) - 82;
 
 //print "return";
 // return back to os startup code

@@ -11,7 +11,7 @@ if(functionNum == 8) then
 
 	while([TERMINAL_STATUS_TABLE] == 1) do
 
-		[(PROCESS_TABLE + 16 * currentPID) + 4] = WAIT_TERMINAL;
+		[(PROCESS_TABLE + (16 * currentPID)) + 4] = WAIT_TERMINAL;
 
 		multipush(R1, R2);
 
@@ -28,30 +28,31 @@ if(functionNum == 8) then
 //=============== Release Terminal ===================
 else if(functionNum == 9) then
 
+	alias retVal R0;
 	//print "release";
 	// checking if calling process is the process which acquired the terminal
 	if(currentPID != [TERMINAL_STATUS_TABLE + 1]) then
 		//print "release1";
-		R0 = -1;
+		retVal = -1;
 		return;
 	endif;
 
 	[TERMINAL_STATUS_TABLE] = 0;
 
-	alias i R3;
+	alias i R1;
 	i = 1;
 	//print "release2";
 
 	while (i < MAX_PROC_NUM) do
-		if([PROCESS_TABLE + (16*i) + 4] == WAIT_TERMINAL) then
+		if([PROCESS_TABLE + (i*16) + 4] == WAIT_TERMINAL) then
 			//print "ready";
 			//print i;
-			[PROCESS_TABLE + (16*i) + 4] = READY;
+			[PROCESS_TABLE + (i*16) + 4] = READY;
 		endif;
 		i = i+1;
 	endwhile;
 
-	R0 = 0;
+	retVal = 0;
 	return;
 
 endif;

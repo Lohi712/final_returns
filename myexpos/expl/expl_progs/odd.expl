@@ -1,13 +1,19 @@
 int main() {
-    decl
-        int x, y;
+    decl 
+        int num, temp;
+        str next;
     enddecl
-    begin
-        x = 1;
-        while(x <= 100) do
-            y = exposcall("Write", -2, x);
-            x = x + 2;
+
+    begin 
+        num = 1;
+        while (num <= 99) do
+            temp = exposcall("Write", -2, num);
+            num = num + 2;
         endwhile;
+
+        next = "even.xsm";
+        temp = exposcall("Exec", next);
+
         return 0;
     end
 }
