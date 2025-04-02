@@ -1,5 +1,5 @@
 //====================BOOT MODULE=====================
-print "boot module";
+//print "boot module";
 // load init program from disk (7, 8) to memory (65, 66)
 loadi(65, 7);
 loadi(66, 8);
@@ -63,6 +63,9 @@ loadi(60, 4);
 // load disk interrupt handler from disk to memory
 loadi(6, 19);
 loadi(7, 20);
+
+// load the Disk Free List from the disk block 2 to the memory page 61.  //<------Changes
+loadi(61, 2);
 
 // initialize the STATUS field in the Terminal Status table as 0
 [TERMINAL_STATUS_TABLE] = 0;
@@ -155,6 +158,16 @@ while(i < 128) do
 		[MEMORY_FREE_LIST + i] = 1;
 	else 
 		[MEMORY_FREE_LIST + i] = 0;
+	endif;
+	i = i + 1;
+endwhile;
+
+// Initialize the disk map table entries for the INIT process
+i = 0;
+while(i <= 9) do					//<----------------Changes
+	[DISK_MAP_TABLE + 16 + i] = -1;
+	if((i >= 4) && (i <= 7)) then //code page
+		[DISK_MAP_TABLE + 16 + i] = [PTBR + (2*i)];
 	endif;
 	i = i + 1;
 endwhile;

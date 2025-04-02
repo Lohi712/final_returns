@@ -9,6 +9,9 @@ int main() {
 		write("Enter file : ");
 		read(filename);
 		temp = exposcall("Exec", filename);
+		if(temp == -1) then
+			write("Unknown file");
+		endif;
 		return 0;
 	end
 
