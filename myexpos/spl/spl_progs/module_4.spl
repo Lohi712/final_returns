@@ -1,112 +1,90 @@
-//=================== MODULE 4 ====================
-//print "Device";
-alias functionNum R1;
-alias currentPID R2;
+// Device Manager Module
 
-//================ Disk Load ===================
-if(functionNum == 2) then
+alias functionNum R8;
+alias currentPID R9;
 
-	alias pageNum R3;
-	alias blockNum R4;
+functionNum = R1;
+currentPID = R2;
 
-	multipush(R1, R2, R3, R4);
-	functionNum = 3;
-	call MOD_0;
-	multipop(R1, R2, R3, R4);
+// Store the function number 8 in register R1 and PID of the curr
+// the System Status table in register R2 (Can use currentPID, as
+// it already contain current PID value).
 
-	// set operation type to be load
-	[DISK_STATUS_TABLE + 1] = 0;
 
-	// set page number
-	[DISK_STATUS_TABLE + 2] = pageNum;
+// Disk Load
+// takes pid, page number, block number.
+if (functionNum == 2) then
+    
+    // Acquires the disk by invoking the Acquire Disk function in the resource manager module (module 0)
+    multipush(R0, R1, R2, R3, R4);
+    R1 = 3;
+    R2 = currentPID;
+    call MOD_0;
+    multipop(R0, R1, R2, R3, R4);
 
-	// set block number
-	[DISK_STATUS_TABLE + 3] = blockNum;
+    // Set the Disk Status table entries
+    [DISK_STATUS_TABLE + 0] = 1; // status
+    [DISK_STATUS_TABLE + 1] = 0; // load / store
+    [DISK_STATUS_TABLE + 2] = R3; // page num
+    [DISK_STATUS_TABLE + 3] = R4; // block num
 
-	// use the load statement to load the disk block to memory
-	load(pageNum, blockNum);
+    // Issue the load statement to initiate a disk block to memory page 
+    load(R3, R4);
 
-	[(PROCESS_TABLE + 16*currentPID) + 4] = WAIT_DISK;
+    // Set the state of the process (with given PID) to WAIT_DISK and invoke the scheduler. 
+    [PROCESS_TABLE + 16 * currentPID + 4] = WAIT_DISK;
 
-	// invoke the scheduler
-	call MOD_5;
+    // invoke the scheduler
+    call MOD_5;
+ 
+    return;
+endif;
 
-//================ TERMINAL WRITE =================
-else if(functionNum == 3) then
-	
-	alias word R3;
-	//============== Calling Acquire Terminal ===============
-	//saving register values
-	multipush(R1, R2, R3);
 
-	// storing arguments in R1 and R2
-	functionNum = 8;
+// Terminal Write
+if (functionNum == 3) then
 
-	// calling module 0
-	call MOD_0;
+    multipush(R0, R1, R2, R3);
+    R1 = 8;
+    R2 = currentPID;
+    call MOD_0;
+    multipop(R0, R1, R2, R3);
 
-	multipop(R1, R2, R3);
+    print R3;
 
-	print word;
-	//=========================================================
-
-	//============== Calling Release Terminal =================
-	//saving register values
-	multipush(R1, R2, R3);
-
-	// storing arguments in R1 and R2
-	functionNum = 9;
-
-	// calling module 0
-	call MOD_0;
-
-	multipop(R1, R2, R3);
-
-//================================================
-
-//================ TERMINAL READ =================
-
-else if(functionNum == 4) then
-
-	alias word R3;
-	//print "ter read";
-	//====== Calling Acquire Terminal =====
-	//saving register values
-	multipush(R1, R2, R3);
-
-	// storing arguments in R1 and R2
-	functionNum = 8;
-
-	// calling module 0 to acquire terminal
-	call MOD_0;
-
-	multipop(R1, R2, R3);
-
-	//================================
-
-	//print "rread";
-	// use read statement, for requesting to read from the terminal
-	read;
-
-	//print "proc";
-	//print [SYSTEM_STATUS_TABLE + 1];
-	[(PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1]*16)) + 4] = WAIT_TERMINAL;
-	
-	//saving register values
-	multipush(R1, R2, R3);
-
-	call MOD_5;
-
-	multipop(R1, R2, R3);
-
-	word =  ([PTBR + (2*(word/512))] * 512) + (word % 512);
-
-	[word] = [PROCESS_TABLE + (16*[SYSTEM_STATUS_TABLE + 1]) + 8];
-
-	//=========================================================
+    multipush(R0, R1, R2, R3);
+    R1 = 9;
+    R2 = currentPID;
+    call MOD_0;
+    multipop(R0, R1, R2, R3);
+    return;
 
 endif;
+
+// Terminal Read
+if (functionNum == 4) then
+
+    multipush(R0, R1, R2, R3);
+    R1 = 8;
+    R2 = currentPID;
+    call MOD_0; // Call resource manager module.
+    multipop(R0, R1, R2, R3);
+
+    read;
+
+    // Change the state of the current process to WAIT_TERMINAL.
+    [PROCESS_TABLE + 16 * currentPID + 4] = WAIT_TERMINAL;
+
+
+    multipush(R0, R1, R2, R3);
+    call MOD_5; // Invoke the scheduler.
+    multipop(R0, R1, R2, R3);
+    R3 = [PTBR + 2 * (R3 / 512)] * 512 + (R3 % 512);
+    [R3] = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 8];
+    return;
+
 endif;
-endif;
+
 
 return;
+

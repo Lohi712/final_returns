@@ -1,24 +1,16 @@
-//================INT 10 module=====================
-print "INT 10";
-// Change the state of the invoking process to TERMINATED
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 4] = TERMINATED;
+// exit system call 
 
-alias i R0;
-alias count R1;
-i = 1;
-count = 1;
+// Exit system call first sets the MODE FLAG to the system call number and switches to the kernal stack.
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 9;
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] * 512 - 1;
 
-while(i < MAX_PROC_NUM) do
-	if([PROCESS_TABLE + 16*i + 4] == TERMINATED) then
-		count = count + 1;
-	endif;
-	i = i + 1;
-endwhile;
+// It then invokes the Exit Process function present in the process manager module.
+R1 = 3;
+R2 = [SYSTEM_STATUS_TABLE + 1];
+call MOD_1;
 
-if(count == MAX_PROC_NUM) then
-	// halt the machine
-	halt;
-endif;
-
-// invoke the context switch module (scheduler)
+// Exit system call invokes the scheduler to schedule other processes. 
 call MOD_5;
+
+breakpoint;
+print "int 10";

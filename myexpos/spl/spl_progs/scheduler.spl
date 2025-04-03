@@ -1,67 +1,67 @@
-// ================SCHEDULER===================
-//print "SCHEDULER";
-// find pid of current process
-alias currentPID R0;
-currentPID = [SYSTEM_STATUS_TABLE + 1];
+// current process and its processing table.
+alias curProcess R0;
+alias processTable R1;
+curProcess = [SYSTEM_STATUS_TABLE + 1];
+processTable = PROCESS_TABLE + 16 * curProcess;
 
-// push BP of current process
-multipush(BP);
+// Saving base pointer.
+SP = SP + 1;
+[SP] = BP;
 
-// compute process table entry of current running process
-alias process_table_entry R1;
-process_table_entry = PROCESS_TABLE + (currentPID * 16);
-[process_table_entry + 12] = SP % 512;
-[process_table_entry + 14] = PTBR;
-[process_table_entry + 15] = PTLR;
+// storing data related to context.
+[processTable + 12] = SP % 512;
+[processTable + 14] = PTBR;
+[processTable + 15] = PTLR;
 
-// Iterate through the Process Table entries, starting from the succeeding entry of the current process to find // a process in READY or CREATED state
-
- //If no such process can be found, select the idle process as the new process to be scheduled. Save // PID of new process to be scheduled as newPID
-
-alias i R2;
-alias j R3;
-alias newPID R4;
-i = 1;
-j = currentPID;
-newPID = 0;
-
-while (i <= 15) do
-	j = j+1;
-	if(j > 15) then
-		j = 1;
-	endif;
-	if(([PROCESS_TABLE + (16*j) + 4] == CREATED) || ([PROCESS_TABLE + (16*j) + 4] == READY)) then
-		newPID = j;
-		break;
-	endif;
-	i = i+1;
-endwhile;
-
-//print "newPID";
-//print newPID;
-alias new_process_entry R5;
-new_process_entry = PROCESS_TABLE + (16*newPID);
-
-// Obtain User Area Page number and kernel stack pointer value from Process Table entry of the new process and // set SP as (User Area Page number) * 512 + (Kernel Stack pointer value)
-SP = ([new_process_entry + 11]*512) + [new_process_entry + 12];
-
-// Restore PTBR and PTLR from the corresponding fields in the Process Table entry of the new process.
-PTBR = [new_process_entry + 14];
-PTLR = [new_process_entry + 15];
-
-// Set the PID of the new process in the current PID field of the System Status Table
-[SYSTEM_STATUS_TABLE + 1] = newPID;
-
-if([new_process_entry + 4] == CREATED) then
-	SP = [new_process_entry + 13];
-	[new_process_entry + 4] = RUNNING;
-	[new_process_entry + 9] = 0;
-	ireturn;
+// finding pid of new process.
+alias iter R2;
+alias newProcess R5;
+if(curProcess == MAX_PROC_NUM - 1) then
+    iter = 1;
+else iter = curProcess + 1;
 endif;
 
-// Set the state of the new process as RUNNING
-[new_process_entry + 4] = RUNNING;
+while(curProcess != iter) do
+    alias state R3;
+    state = [PROCESS_TABLE + 16 * iter + 4];
+    if(state == CREATED || state == READY) then
+        break;
+    endif;
+    if(iter + 1 == MAX_PROC_NUM) then
+        iter = 1;
+    else iter = iter + 1;
+    endif;
+endwhile;
 
-// Restore the BP of the new process from the top of it's kernel stack
-multipop(BP);
-return;
+// no process found, idle is scheduled.
+if(iter == curProcess && [PROCESS_TABLE + 16 * iter + 4] != READY) then
+    newProcess = 0;
+else newProcess = iter;
+endif;
+
+// process table entries of the new process
+alias newProcessTable R6;
+newProcessTable = PROCESS_TABLE + 16 * newProcess;
+//restoring data for the new process
+PTBR = [newProcessTable + 14];
+PTLR = [newProcessTable + 15];
+[SYSTEM_STATUS_TABLE + 1] = newProcess;
+
+// returning the control to new process / timer.
+if([newProcessTable + 4] == CREATED) then
+    //this returns the control to the new program that has not yet been scheduled
+    // Set BP to the value stored at the beginning of the kernel stack.    
+    SP = [newProcessTable + 13];
+    BP = [[newProcessTable + 11] * 512]; 
+    [newProcessTable + 4] = RUNNING;
+    [newProcessTable + 9] = 0;
+    ireturn;
+else
+    //this returns control timer interrupt for the porgrams that has been scheduled atleast once
+    [newProcessTable + 4] = RUNNING;
+    [newProcessTable + 9] = 0;
+    SP = [newProcessTable + 11] * 512 + [newProcessTable + 12];
+    BP = [SP];
+    SP = SP - 1;
+    return;
+endif;
